@@ -227,8 +227,8 @@ class Subcribe():
 def main():
 
     # Please fill your application clientId and clientSecret before running script
-    your_app_client_id = '91dfFinrP6GRu4bltlpCc4flTsuAdMRUcGK8cpw4'
-    your_app_client_secret = 'dbk52orCpu7IZx5E66hzM2KsvlO0JIIP7W2ABt2IHhnP2SVFYhvaI7sY7ngdy4KMwYvcms7BMWSec6pvsYu1pHCbNY3vfftweWhR3HN1DSVDPcS4kDS11pZU9jRzdQwo'
+    your_app_client_id = 'yaGy0V8JFReU6vNCV9B2QirZgc28UOZm5SaGDoCD'
+    your_app_client_secret = 'o6qZFMFKNKypt34xWuHRZc9G1U6UjBrLMjrQyQBVucZws5X7MrKOluKDgmrYaa14mqCxhEjZDz2PAffJNzijQfsI2PxRWr0DjZvjS3194on8am78xKTNM8O3sJVC5pqd'
     # dbk52orCpu7IZx5E66hzM2KsvlO0JIIP7W2ABt2IHhnP2SVFYhvaI7sY7ngdy4KMwYvcms7BMWSec6pvsYu1pHCbNY3vfftweWhR3HN1DSVDPcS4kDS11pZU9jRzdQwo
 
     s = Subcribe(your_app_client_id, your_app_client_secret)
