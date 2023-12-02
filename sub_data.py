@@ -1,4 +1,7 @@
 from cortex import Cortex
+import numpy as np
+import time
+from scipy.signal import butter, filtfilt
 
 class Subcribe():
     """
@@ -34,10 +37,12 @@ class Subcribe():
         If you do not want to log request and response message , set debug_mode = False. The default is True
         """
         print("Subscribe __init__")
+        self._eeg_data = []
         self.c = Cortex(app_client_id, app_client_secret, debug_mode=True, **kwargs)
         self.c.bind(create_session_done=self.on_create_session_done)
         self.c.bind(new_data_labels=self.on_new_data_labels)
         self.c.bind(new_eeg_data=self.on_new_eeg_data)
+
         self.c.bind(new_mot_data=self.on_new_mot_data)
         self.c.bind(new_dev_data=self.on_new_dev_data)
         self.c.bind(new_met_data=self.on_new_met_data)
@@ -124,6 +129,9 @@ class Subcribe():
         name: stream name
         For example:
             eeg: ["COUNTER","INTERPOLATED", "AF3", "T7", "Pz", "T8", "AF4", "RAW_CQ", "MARKER_HARDWARE"]
+            
+                    "AF3","F7","F3","FC5","T7","P7","O1","O2","P8","T8","FC6","F4","F8","AF4",
+            
             motion: ['COUNTER_MEMS', 'INTERPOLATED_MEMS', 'Q0', 'Q1', 'Q2', 'Q3', 'ACCX', 'ACCY', 'ACCZ', 'MAGX', 'MAGY', 'MAGZ']
             dev: ['AF3', 'T7', 'Pz', 'T8', 'AF4', 'OVERALL']
             met : ['eng.isActive', 'eng', 'exc.isActive', 'exc', 'lex', 'str.isActive', 'str', 'rel.isActive', 'rel', 'int.isActive', 'int', 'foc.isActive', 'foc']
@@ -146,7 +154,10 @@ class Subcribe():
            {'eeg': [99, 0, 4291.795, 4371.795, 4078.461, 4036.41, 4231.795, 0.0, 0], 'time': 1627457774.5166}
         """
         data = kwargs.get('data')
-        print('eeg data: {}'.format(data))
+        data_list = data['eeg']
+        data_list.append(data['time'])
+        self._eeg_data.append(data_list)
+        #print('eeg data: {}'.format(data))
 
     def on_new_mot_data(self, *args, **kwargs):
         """
@@ -211,6 +222,17 @@ class Subcribe():
         error_data = kwargs.get('error_data')
         print(error_data)
 
+    def close(self):
+        self.c.close()
+
+    def save(self, name):
+        self._eeg_data
+        np.save(name, np.array(self._eeg_data))
+        print("-----------saved time-----------------")
+        print(self._eeg_data[-1][-1]-self._eeg_data[0][-1])
+
+
+
 # -----------------------------------------------------------
 # 
 # GETTING STARTED
@@ -224,20 +246,56 @@ class Subcribe():
 # 
 # -----------------------------------------------------------
 
-def main():
+class BCI_dev:
+    def __init__(self, need_data):      
+        your_app_client_id = 'yaGy0V8JFReU6vNCV9B2QirZgc28UOZm5SaGDoCD'
+        your_app_client_secret = 'o6qZFMFKNKypt34xWuHRZc9G1U6UjBrLMjrQyQBVucZws5X7MrKOluKDgmrYaa14mqCxhEjZDz2PAffJNzijQfsI2PxRWr0DjZvjS3194on8am78xKTNM8O3sJVC5pqd'
 
+        self._streams = need_data
+        self._subcribe = Subcribe(your_app_client_id, your_app_client_secret)
+    
+    def start(self):
+        self._subcribe.start(self._streams)
+
+    def save(self, address):
+        self._subcribe.save(address)
+
+    def close(self):
+        self._subcribe.close()
+    
+    def egg_data(self):
+        return self._subcribe._eeg_data
+
+    # def butter_bandpass_filter(self, lowcut, highcut, fs, order=5):
+    #     fa = 0.5 * fs
+    #     low = lowcut / fa
+    #     high = highcut / fa
+    #     b, a = butter(order, [low, high], btype='band')
+    #     save_np_data = np.array(self._subcribe._eeg_data)
+    #     for i in range(2, -3)
+    #     y = filtfilt(b, a, data)
+    #     return y
+
+
+def main():
     # Please fill your application clientId and clientSecret before running script
     your_app_client_id = 'yaGy0V8JFReU6vNCV9B2QirZgc28UOZm5SaGDoCD'
     your_app_client_secret = 'o6qZFMFKNKypt34xWuHRZc9G1U6UjBrLMjrQyQBVucZws5X7MrKOluKDgmrYaa14mqCxhEjZDz2PAffJNzijQfsI2PxRWr0DjZvjS3194on8am78xKTNM8O3sJVC5pqd'
-    # dbk52orCpu7IZx5E66hzM2KsvlO0JIIP7W2ABt2IHhnP2SVFYhvaI7sY7ngdy4KMwYvcms7BMWSec6pvsYu1pHCbNY3vfftweWhR3HN1DSVDPcS4kDS11pZU9jRzdQwo
+    # o6qZFMFKNKypt34xWuHRZc9G1U6UjBrLMjrQyQBVucZws5X7MrKOluKDgmrYaa14mqCxhEjZDz2PAffJNzijQfsI2PxRWr0DjZvjS3194on8am78xKTNM8O3sJVC5pqd
 
     s = Subcribe(your_app_client_id, your_app_client_secret)
 
     # list data streams
     streams = ['eeg']
     s.start(streams)
+    time.sleep(10)
+    s.save("left arm(no real move).npy")
+    s.close()
+
+
 
 if __name__ =='__main__':
     main()
+
 
 # -----------------------------------------------------------

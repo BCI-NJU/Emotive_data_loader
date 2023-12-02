@@ -112,7 +112,7 @@ class Cortex(Dispatcher):
 
         self.websock_thread  = threading.Thread(target=self.ws.run_forever, args=(None, sslopt), name=threadName)
         self.websock_thread.start()
-        self.websock_thread.join()
+        #self.websock_thread.join()
 
     def close(self):
         self.ws.close()
