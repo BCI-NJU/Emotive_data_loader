@@ -155,6 +155,7 @@ class Subcribe():
         """
         data = kwargs.get('data')
         data_list = data['eeg']
+
         data_list.append(data['time'])
         self._eeg_data.append(data_list)
         #print('eeg data: {}'.format(data))
@@ -266,6 +267,16 @@ class BCI_dev:
     def egg_data(self):
         return self._subcribe._eeg_data
 
+    def wait(self, wait_time):
+        while(1):
+            time.sleep(1)
+            if(self._subcribe._eeg_data!=[]):
+               sub_time = self._subcribe._eeg_data[-1][-1]-self._subcribe._eeg_data[0][-1]
+               print(sub_time)
+               if(sub_time >= wait_time):
+                    break
+
+
     # def butter_bandpass_filter(self, lowcut, highcut, fs, order=5):
     #     fa = 0.5 * fs
     #     low = lowcut / fa
@@ -286,10 +297,10 @@ def main():
     s = Subcribe(your_app_client_id, your_app_client_secret)
 
     # list data streams
-    streams = ['eeg']
+    streams = ['eeg', ]
     s.start(streams)
     time.sleep(10)
-    s.save("left arm(no real move).npy")
+    s.save("txt")
     s.close()
 
 

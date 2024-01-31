@@ -36,9 +36,10 @@ def data_processing(address, butter_order = 2):
 
 def make_data(address ,wait_time, time_len ,streams = ['eeg']):
     time.sleep(wait_time)
+    print("strat")
     my_BCI = BCI_dev(streams)
     my_BCI.start()
-    time.sleep(time_len)
+    my_BCI.wait(time_len)
     my_BCI.close()
     my_BCI.save(address + '_orginal.npy')
 
@@ -49,7 +50,7 @@ def make_data(address ,wait_time, time_len ,streams = ['eeg']):
 
 
 if __name__ =='__main__':
-    make_data('./data/leg', 15, 15)
+    make_data('./data/nothing', 10, 120, ['eeg', 'eq'])
     
     
 
