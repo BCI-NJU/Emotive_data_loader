@@ -38,6 +38,7 @@ class Subcribe():
         """
         print("Subscribe __init__")
         self._eeg_data = []
+        self._is_run = True
         self.c = Cortex(app_client_id, app_client_secret, debug_mode=True, **kwargs)
         self.c.bind(create_session_done=self.on_create_session_done)
         self.c.bind(new_data_labels=self.on_new_data_labels)
@@ -153,12 +154,14 @@ class Subcribe():
         For example:
            {'eeg': [99, 0, 4291.795, 4371.795, 4078.461, 4036.41, 4231.795, 0.0, 0], 'time': 1627457774.5166}
         """
-        data = kwargs.get('data')
-        data_list = data['eeg']
-
-        data_list.append(data['time'])
-        self._eeg_data.append(data_list)
-        #print('eeg data: {}'.format(data))
+        if(self._is_run):
+            data = kwargs.get('data')
+            data_list = data['eeg']
+            data_list.append(data['time'])
+            self._eeg_data.append(data_list)
+            #print('eeg data: {}'.format(data))
+        else:
+            self._eeg_data = []
 
     def on_new_mot_data(self, *args, **kwargs):
         """
@@ -254,12 +257,17 @@ class BCI_dev:
 
         self._streams = need_data
         self._subcribe = Subcribe(your_app_client_id, your_app_client_secret)
+        self._BCI_data = []
     
     def start(self):
         self._subcribe.start(self._streams)
 
     def save(self, address):
-        self._subcribe.save(address)
+        if(self._BCI_data != [] ):
+            np.save(address, np.array(self._BCI_data))
+        else:
+            self._subcribe.save(address)
+        
 
     def close(self):
         self._subcribe.close()
@@ -269,12 +277,35 @@ class BCI_dev:
 
     def wait(self, wait_time):
         while(1):
-            time.sleep(1)
+            time.sleep(0.1)
             if(self._subcribe._eeg_data!=[]):
                sub_time = self._subcribe._eeg_data[-1][-1]-self._subcribe._eeg_data[0][-1]
                print(sub_time)
                if(sub_time >= wait_time):
                     break
+               
+    def run_and_sleep_save(self, run_time, sleep_time, times):
+
+        for i in range(times):
+            print("-----run-------"+ str(i))
+            self._subcribe._is_run = True
+            while(1):
+                time.sleep(0.01)
+                if(self._subcribe._eeg_data!=[]):
+                    sub_time = self._subcribe._eeg_data[-1][-1]-self._subcribe._eeg_data[0][-1]
+                    if(sub_time >= run_time):
+                        self._BCI_data.append(self._subcribe._eeg_data)
+                        self._subcribe._is_run = False
+                        break
+            
+            for j in range(sleep_time):
+                print("waiting...... " + str(j))
+                time.sleep(1)
+            
+
+
+
+
 
 
     # def butter_bandpass_filter(self, lowcut, highcut, fs, order=5):

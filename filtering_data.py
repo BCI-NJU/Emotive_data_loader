@@ -22,11 +22,14 @@ def iirnotch_filter(data, fs = 250, Q = 30, f_cut = 50.0):
     return ret
 
 
-def data_processing(address, butter_order = 2):
+def data_processing(data_org, butter_order = 2):
     '''
     return data:前14个为节点信号，最后一个是时间信号
     '''
-    data = np.load(address)
+    data = []
+    for i in range(len(data_org)):
+        data.extend(data_org[i][0:1000])
+    data = np.array(data)
     time_list = data[:,-1] - data[0,-1]
     eeg_list = data[:,2:-3].T
     filter_data = butter_bandpass_filter(eeg_list, 0.5, 100, 250, butter_order)
@@ -39,18 +42,25 @@ def make_data(address ,wait_time, time_len ,streams = ['eeg']):
     print("strat")
     my_BCI = BCI_dev(streams)
     my_BCI.start()
-    my_BCI.wait(time_len)
+    my_BCI.run_and_sleep_save(4, 1, 100)
     my_BCI.close()
     my_BCI.save(address + '_orginal.npy')
 
-    data = data_processing(address + '_orginal.npy')
+    # data = data_processing(address + '_orginal.npy')
 
-    np.save(address + '_processed.npy',data)
+    # np.save(address + '_processed.npy',data)
 
 
 
 if __name__ =='__main__':
-    make_data('./data/nothing', 10, 120, ['eeg', 'eq'])
+    # make_data('./data/nothing3', 10, 120, ['eeg'])
+
+    data1 = np.load("./data/nothing1_orginal.npy",allow_pickle=True)
+    data1 = np.append(data1, np.load("./data/nothing2_orginal.npy",allow_pickle=True))
+    data1 = np.append(data1, np.load("./data/nothing3_orginal.npy",allow_pickle=True))
+    data = data_processing(data1)
+    np.save('./data/nothing' + '_processed.npy',data)
+
     
     
 
